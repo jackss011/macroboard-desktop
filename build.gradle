@@ -1,0 +1,100 @@
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'cpp'
+
+version '1.0-SNAPSHOT'
+sourceCompatibility = 1.8
+
+// Java plugin setup
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'net.java.dev.jna:jna:4.4.0'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/java']
+        }
+    }
+}
+
+
+// Cpp plugin: setup model
+model {
+    platforms {
+        x64 {
+            architecture 'x64'
+        }
+    }
+
+    binaries {
+        all {
+            if (toolChain in VisualCpp) {
+                linker.args 'user32.lib'
+            }
+        }
+    }
+
+    components {
+        mbctrls(NativeLibrarySpec) {
+            targetPlatform 'x64'
+
+            sources {
+                cpp {
+                    source {
+                        srcDirs 'native'
+                        include '**/*.cpp'
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+// FileCollection of native libraries (dll, do, dylib) which will be included in the packaged app
+def nativeLibs = fileTree('build/libs/mbctrls/shared') {
+    include '*.dll'
+    include '*.so'
+    include '*.dylib'
+}
+
+// Name of the folder containing the packaged app
+def appName = project.name
+
+// Relative path to the folder containing the packaged app
+def artifactsOutDir = "build/artifacts/$appName"
+
+
+
+// Copy the dll to build/native where it can be found by jna
+task('moveDll', type: Copy, dependsOn: 'mbctrlsSharedLibrary') {
+    group 'app'
+    from nativeLibs
+    into 'build/native'
+}
+
+tasks.findByName('build').dependsOn 'moveDll'
+
+
+// Create a jar and copy native library in the parent folder
+task('package', type: Copy, dependsOn: ['jar', 'mbctrlsSharedLibrary']) {
+    group 'app'
+    from nativeLibs
+    into "$artifactsOutDir/bin"
+}
+
+
+// Java plugin: create a jar for the app
+jar {
+    manifest { attributes("Main-Class": "macroboard.Main") }
+    destinationDir file(artifactsOutDir)
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}

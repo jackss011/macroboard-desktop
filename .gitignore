@@ -1,0 +1,8 @@
+# IntelliJ
+/build
+.idea/**/workspace.xml
+
+# Gradle
+/.gradle
+.idea/**/libraries
+.idea/**/gradle.xml
