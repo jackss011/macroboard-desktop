@@ -21,6 +21,11 @@ sourceSets {
         java {
             srcDirs = ['src/java']
         }
+        resources {
+            srcDirs = ['src/res']
+            include '**/*.css'
+        }
+        output.resourcesDir 'build/classes/main/macroboard'
     }
 }
 
