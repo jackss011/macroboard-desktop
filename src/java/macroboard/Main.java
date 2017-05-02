@@ -37,9 +37,6 @@ public class Main extends Application
         title.setFill(Color.WHITE);
         title.setFont(Font.font("Helvetica", FontWeight.BOLD, 25));
 
-        //Button settings = new Button("S");
-        //settings.setPrefSize(40,40);
-
         HBox header = new HBox(title);
         header.setCache(true);
         header.setPadding(new Insets(12, 30, 12, 30));
@@ -47,7 +44,6 @@ public class Main extends Application
         header.setEffect(StaticLibrary.buildShadowBox(8));
 
         VBox root = new VBox(header);
-
         return root;
     }
 
@@ -70,14 +66,16 @@ public class Main extends Application
 
     public static Path getApplicationPath()
     {
-        return null; //TODO: implement this
+        String path = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        // java bug fix: if it's on windows (the path contains ':') remove the first char if it's equal to '/'
+        if(path.contains(":") && path.startsWith("/"))
+            path = path.substring(1);
+        return Paths.get(path);
     }
 
     public static String getBinaryFolder()
     {
-        Path p = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation()
-                .getPath().substring(1));       //TODO: fix for other platforms
-        return p.getParent().resolve("bin").toString();
+        return getApplicationPath().getParent().resolve("bin").toString();
     }
 
     public static String getMainCssPath()
