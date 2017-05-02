@@ -33,14 +33,12 @@ public class Main extends Application
     {
         Text title = new Text("Macroboard");
         title.setCache(true);
-        title.setId("app-title");
-        title.setFill(Color.WHITE);
-        title.setFont(Font.font("Helvetica", FontWeight.BOLD, 25));
+        title.setId("title");
 
         HBox header = new HBox(title);
+        header.setId("header");
         header.setCache(true);
         header.setPadding(new Insets(12, 30, 12, 30));
-        header.setStyle("-fx-background-color: #009688;");
         header.setEffect(StaticLibrary.buildShadowBox(8));
 
         VBox root = new VBox(header);

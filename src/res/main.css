@@ -1,4 +1,9 @@
-#app-title {
+#title {
     -fx-fill: white;
     -fx-font: 25px Helvetica;
+    -fx-font-weight: bold;
+}
+
+#header {
+    -fx-background-color: #009688;
 }
