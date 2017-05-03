@@ -68,8 +68,10 @@ tasks.findByName('build').dependsOn 'moveDll'
 // ||============================
 
 /** Path to the folder containing the packaged app */
-def artifactsOutDir = "build/artifacts/$appName"
+def ARTIFACTS_OUT_DIR = "build/artifacts/$appName"
 
+/** Path representing the package where resources will be moved after .class(s) compiling. */
+def RESOURCE_PACKAGE = 'macroboard'
 
 repositories {
     mavenCentral()
@@ -102,7 +104,7 @@ task('package', type: Copy, dependsOn: ['packJar', 'librarySharedLibrary']) {
     group 'app'
 
     from nativeLibs
-    into "$artifactsOutDir/bin"
+    into "$ARTIFACTS_OUT_DIR/bin"
 }
 
 
@@ -111,7 +113,7 @@ task packJar(type: Jar, dependsOn: 'classes') {
     manifest { attributes("Main-Class": "macroboard.Main") }
     from sourceSets.main.output.classesDir    //main source set
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }  //include libraries
-    destinationDir file(artifactsOutDir)
+    destinationDir file(ARTIFACTS_OUT_DIR)
 }
 
 
