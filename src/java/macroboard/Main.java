@@ -13,6 +13,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import macroboard.controls.ControlsLibrary;
+import macroboard.network.NetAdapter;
 import macroboard.utility.ResourcesLocator;
 import macroboard.utility.StaticLibrary;
 
@@ -22,6 +23,8 @@ import java.nio.file.Paths;
 
 public class Main extends Application
 {
+    private NetAdapter netAdapter = new NetAdapter();
+
     @Override
     public void start(Stage primaryStage) throws Exception
     {
@@ -30,6 +33,8 @@ public class Main extends Application
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
+
+        netAdapter.accept();
     }
 
     private Parent buildUI()
@@ -55,6 +60,8 @@ public class Main extends Application
     public void stop() throws Exception
     {
         super.stop();
+
+        netAdapter.close();
     }
 
     public static void main(String[] args)
