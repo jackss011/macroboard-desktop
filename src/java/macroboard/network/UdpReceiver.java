@@ -49,7 +49,8 @@ class UdpReceiver extends Service
                 }
                 catch (Exception e)
                 {
-                    e.printStackTrace();
+                    if(socket != null && !socket.isClosed())
+                        e.printStackTrace();
                 }
                 finally
                 {

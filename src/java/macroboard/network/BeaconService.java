@@ -47,7 +47,7 @@ class BeaconService extends Service
                     if (true) //TODO: check data packet data here
                     {
                         InetAddress senderAddress = packet.getAddress();
-                        System.out.println("Received from: " + senderAddress.getHostAddress());
+                        Log.d("Received from: " + senderAddress.getHostAddress());
 
                         final String responseData = "response";
 
@@ -63,7 +63,8 @@ class BeaconService extends Service
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                if(receiver!= null && !receiver.isClosed())
+                    e.printStackTrace();
             }
             finally
             {
