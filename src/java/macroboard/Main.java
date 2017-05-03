@@ -64,7 +64,7 @@ public class Main extends Application
 
     private static void setupSystemProperties()
     {
-        System.setProperty("jna.library.path", "build/native;" + getBinaryFolder());
+        System.setProperty("jna.library.path", getBinariesFolder() + ";build/libs/library/shared;");
     }
 
     public static Path getApplicationPath()
@@ -76,7 +76,7 @@ public class Main extends Application
         return Paths.get(path);
     }
 
-    public static String getBinaryFolder()
+    public static String getBinariesFolder()
     {
         return getApplicationPath().getParent().resolve("bin").toString();
     }

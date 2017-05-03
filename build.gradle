@@ -53,15 +53,6 @@ def nativeLibs = fileTree("build/libs/library/shared") {
 }
 
 
-/** Move native libraries to other locations */
-task moveDll(type: Copy, dependsOn: 'librarySharedLibrary') {
-    group 'app'
-    from nativeLibs
-    into 'build/native'
-}
-tasks.build.dependsOn 'moveDll'
-
-
 
 // ||============================
 // ||==>  JAVA
