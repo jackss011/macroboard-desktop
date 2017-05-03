@@ -13,6 +13,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import macroboard.controls.ControlsLibrary;
+import macroboard.utility.ResourcesLocator;
 import macroboard.utility.StaticLibrary;
 
 import java.nio.file.Path;
@@ -25,7 +26,7 @@ public class Main extends Application
     public void start(Stage primaryStage) throws Exception
     {
         Scene scene = new Scene(buildUI(), 400, 300);
-        scene.getStylesheets().add(getMainCssPath());
+        scene.getStylesheets().add(ResourcesLocator.getMainCssPath());
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
@@ -64,25 +65,6 @@ public class Main extends Application
 
     private static void setupSystemProperties()
     {
-        System.setProperty("jna.library.path", getBinariesFolder() + ";build/libs/library/shared;");
-    }
-
-    public static Path getApplicationPath()
-    {
-        String path = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        // java bug fix: if it's on windows (the path contains ':') remove the first char if it's equal to '/'
-        if(path.contains(":") && path.startsWith("/"))
-            path = path.substring(1);
-        return Paths.get(path);
-    }
-
-    public static String getBinariesFolder()
-    {
-        return getApplicationPath().getParent().resolve("bin").toString();
-    }
-
-    public static String getMainCssPath()
-    {
-        return Main.class.getResource("main.css").toExternalForm();
+        System.setProperty("jna.library.path", ResourcesLocator.getBinariesFolder() + ";build/libs/library/shared;");
     }
 }
