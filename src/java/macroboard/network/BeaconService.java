@@ -27,7 +27,7 @@ class BeaconService extends Service
         @Override
         protected Void call() throws Exception
         {
-            System.out.println("Running");
+            System.out.println("Start BEACON service");
 
             try (DatagramSocket responder = new DatagramSocket())
             {

@@ -25,6 +25,8 @@ class UdpReceiver extends Service
             @Override
             protected Object call() throws Exception
             {
+                Log.d("Start UDP service");
+
                 try
                 {
                     socket = new DatagramSocket(StaticSettings.NET_PORT);
