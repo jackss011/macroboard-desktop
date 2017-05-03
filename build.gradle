@@ -94,7 +94,7 @@ sourceSets {
             srcDirs = ['src/res']
             exclude '**/*.sass'
         }
-        output.resourcesDir 'build/classes/main/macroboard'
+        output.resourcesDir "${output.classesDir}/$RESOURCE_PACKAGE"
     }
 }
 
