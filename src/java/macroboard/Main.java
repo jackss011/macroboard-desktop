@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -11,6 +12,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import macroboard.controls.ControlsLibrary;
 import macroboard.utility.StaticLibrary;
 
 import java.nio.file.Path;
@@ -41,7 +43,10 @@ public class Main extends Application
         header.setPadding(new Insets(12, 30, 12, 30));
         header.setEffect(StaticLibrary.buildShadowBox(8));
 
-        VBox root = new VBox(header);
+        Button test = new Button("Mute");
+        test.setOnAction(event -> ControlsLibrary.INSTANCE.typeMuteKey());
+
+        VBox root = new VBox(header, test);
         return root;
     }
 

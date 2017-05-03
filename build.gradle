@@ -2,35 +2,17 @@ apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'cpp'
 
-version '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
-// Java plugin setup
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compile 'net.java.dev.jna:jna:4.4.0'
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/java']
-        }
-        resources {
-            srcDirs = ['src/res']
-            exclude '**/*.sass'
-        }
-        output.resourcesDir 'build/classes/main/macroboard'
-    }
-}
+// Name of the folder containing the packaged app
+def appName = project.name
+version '1.0-SNAPSHOT'
 
 
-// Cpp plugin: setup model
+// ||============================
+// ||==>  C++
+// ||============================
+
 model {
     platforms {
         x64 {
@@ -47,7 +29,8 @@ model {
     }
 
     components {
-        mbctrls(NativeLibrarySpec) {
+        library(NativeLibrarySpec) {
+            baseName 'macroboard'   // library file name to import
             targetPlatform 'x64'
 
             sources {
@@ -63,35 +46,62 @@ model {
 }
 
 
-
 // FileCollection of native libraries (dll, do, dylib) which will be included in the packaged app
-def nativeLibs = fileTree('build/libs/mbctrls/shared') {
+def nativeLibs = fileTree("build/libs/library/shared") {
     include '*.dll'
     include '*.so'
     include '*.dylib'
 }
 
-// Name of the folder containing the packaged app
-def appName = project.name
+
+// Copy the dll to build/native where it can be found by jna
+task moveDll(type: Copy, dependsOn: 'librarySharedLibrary') {
+    group 'app'
+    from nativeLibs
+    into 'build/native'
+}
+tasks.findByName('build').dependsOn 'moveDll'
+
+
+
+// ||============================
+// ||==>  JAVA
+// ||============================
 
 // Relative path to the folder containing the packaged app
 def artifactsOutDir = "build/artifacts/$appName"
 
 
-
-// Copy the dll to build/native where it can be found by jna
-task moveDll(type: Copy, dependsOn: 'mbctrlsSharedLibrary') {
-    group 'app'
-    from nativeLibs
-    into 'build/native'
+repositories {
+    mavenCentral()
 }
 
-tasks.findByName('build').dependsOn 'moveDll'
+
+dependencies {
+    compile 'net.java.dev.jna:jna:4.4.0'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/java']
+        }
+        resources {
+            srcDirs = ['src/res']
+            exclude '**/*.sass'
+        }
+        output.resourcesDir 'build/classes/main/macroboard'
+    }
+}
 
 
 // Create a jar and copy native library in the parent folder
-task('package', type: Copy, dependsOn: ['packJar', 'mbctrlsSharedLibrary']) {
+task('package', type: Copy, dependsOn: ['packJar', 'librarySharedLibrary']) {
     group 'app'
+
     from nativeLibs
     into "$artifactsOutDir/bin"
 }
@@ -105,6 +115,11 @@ task packJar(type: Jar, dependsOn: 'classes') {
     destinationDir file(artifactsOutDir)
 }
 
+
+
+// ||============================
+// ||==>  SASS
+// ||============================
 
 def final MAIN_SASS_DIR = 'src/res/main.sass'
 def final BUILT_CSS_DIR = "${sourceSets.main.output.resourcesDir}/main.css"
