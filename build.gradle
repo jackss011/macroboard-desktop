@@ -4,7 +4,6 @@ apply plugin: 'cpp'
 
 sourceCompatibility = 1.8
 
-// Name of the folder containing the packaged app
 def appName = project.name
 version '1.0-SNAPSHOT'
 
@@ -46,7 +45,7 @@ model {
 }
 
 
-// FileCollection of native libraries (dll, do, dylib) which will be included in the packaged app
+/** FileCollection of native libraries (dll, do, dylib) which will be included in the packaged app */
 def nativeLibs = fileTree("build/libs/library/shared") {
     include '*.dll'
     include '*.so'
@@ -54,7 +53,7 @@ def nativeLibs = fileTree("build/libs/library/shared") {
 }
 
 
-// Copy the dll to build/native where it can be found by jna
+/** Move native libraries to other locations */
 task moveDll(type: Copy, dependsOn: 'librarySharedLibrary') {
     group 'app'
     from nativeLibs
@@ -68,7 +67,7 @@ tasks.findByName('build').dependsOn 'moveDll'
 // ||==>  JAVA
 // ||============================
 
-// Relative path to the folder containing the packaged app
+/** Path to the folder containing the packaged app */
 def artifactsOutDir = "build/artifacts/$appName"
 
 
@@ -98,7 +97,7 @@ sourceSets {
 }
 
 
-// Create a jar and copy native library in the parent folder
+/** Package the entire app in a folder */
 task('package', type: Copy, dependsOn: ['packJar', 'librarySharedLibrary']) {
     group 'app'
 
@@ -107,7 +106,7 @@ task('package', type: Copy, dependsOn: ['packJar', 'librarySharedLibrary']) {
 }
 
 
-// Create application jar
+/** Package java code in a Jar file */
 task packJar(type: Jar, dependsOn: 'classes') {
     manifest { attributes("Main-Class": "macroboard.Main") }
     from sourceSets.main.output.classesDir    //main source set
@@ -125,7 +124,7 @@ def final MAIN_SASS_DIR = 'src/res/main.sass'
 def final BUILT_CSS_DIR = "${sourceSets.main.output.resourcesDir}/main.css"
 def final SASS_OPT = '--sourcemap=none'
 
-// Compile sass
+/** Compile sass and output a css to resources dir */
 task compileSass(type: Exec) {
     group 'app'
     mustRunAfter 'classes'
