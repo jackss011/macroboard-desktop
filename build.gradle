@@ -107,7 +107,7 @@ task packJar(type: Jar, dependsOn: 'classes') {
 
 
 def final MAIN_SASS_DIR = 'src/res/main.sass'
-def final BUILT_CSS_DIR = 'build/classes/main/macroboard/main.css'
+def final BUILT_CSS_DIR = "${sourceSets.main.output.resourcesDir}/main.css"
 def final SASS_OPT = '--sourcemap=none'
 
 // Compile sass
