@@ -2,35 +2,16 @@ apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'cpp'
 
-version '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
-// Java plugin setup
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compile 'net.java.dev.jna:jna:4.4.0'
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/java']
-        }
-        resources {
-            srcDirs = ['src/res']
-            include '**/*.css'
-        }
-        output.resourcesDir 'build/classes/main/macroboard'
-    }
-}
+def appName = project.name
+version '1.0-SNAPSHOT'
 
 
-// Cpp plugin: setup model
+// ||============================
+// ||==>  C++
+// ||============================
+
 model {
     platforms {
         x64 {
@@ -47,7 +28,8 @@ model {
     }
 
     components {
-        mbctrls(NativeLibrarySpec) {
+        library(NativeLibrarySpec) {
+            baseName 'macroboard'   // library file name to import
             targetPlatform 'x64'
 
             sources {
@@ -63,43 +45,96 @@ model {
 }
 
 
-
-// FileCollection of native libraries (dll, do, dylib) which will be included in the packaged app
-def nativeLibs = fileTree('build/libs/mbctrls/shared') {
+/** FileCollection of native libraries (dll, do, dylib) which will be included in the packaged app */
+def nativeLibs = fileTree("build/libs/library/shared") {
     include '*.dll'
     include '*.so'
     include '*.dylib'
 }
 
-// Name of the folder containing the packaged app
-def appName = project.name
-
-// Relative path to the folder containing the packaged app
-def artifactsOutDir = "build/artifacts/$appName"
 
 
+// ||============================
+// ||==>  JAVA
+// ||============================
 
-// Copy the dll to build/native where it can be found by jna
-task('moveDll', type: Copy, dependsOn: 'mbctrlsSharedLibrary') {
-    group 'app'
-    from nativeLibs
-    into 'build/native'
-}
+/** Path to the folder containing the packaged app */
+def ARTIFACTS_OUT_DIR = "build/artifacts/$appName"
 
-tasks.findByName('build').dependsOn 'moveDll'
+/** Path representing the package where resources will be moved after .class(s) compiling. */
+def RESOURCE_PACKAGE = 'macroboard'
 
-
-// Create a jar and copy native library in the parent folder
-task('package', type: Copy, dependsOn: ['jar', 'mbctrlsSharedLibrary']) {
-    group 'app'
-    from nativeLibs
-    into "$artifactsOutDir/bin"
+repositories {
+    mavenCentral()
 }
 
 
-// Java plugin: create a jar for the app
-jar {
+dependencies {
+    compile 'net.java.dev.jna:jna:4.4.0'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/java']
+        }
+        resources {
+            srcDirs = ['src/res']
+            exclude '**/*.sass'
+        }
+        output.resourcesDir "${output.classesDir}/$RESOURCE_PACKAGE"
+    }
+}
+
+
+/** Package java code in a Jar file */
+task packJar(type: Jar, dependsOn: 'classes') {
     manifest { attributes("Main-Class": "macroboard.Main") }
-    destinationDir file(artifactsOutDir)
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from sourceSets.main.output.classesDir    //main source set
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }  //include libraries
+    destinationDir file(ARTIFACTS_OUT_DIR)
 }
+
+
+/** Package the entire app in a folder */
+task packApp(type: Copy, dependsOn: ['packJar', 'librarySharedLibrary']) {
+    group 'app'
+
+    from nativeLibs
+    into "$ARTIFACTS_OUT_DIR/bin"
+}
+
+
+
+// ||============================
+// ||==>  SASS
+// ||============================
+
+def final MAIN_SASS_DIR = 'src/res/main.sass'
+def final BUILT_CSS_DIR = "${sourceSets.main.output.resourcesDir}/main.css"
+def final SASS_OPT = '--sourcemap=none'
+
+/** Compile sass and output a css to resources dir */
+task compileSass(type: Exec) {
+    group 'app'
+    mustRunAfter 'classes'
+
+    doFirst {
+        file(BUILT_CSS_DIR).getParentFile().mkdirs()
+    }
+
+    if(System.getProperty("os.name").toLowerCase().contains("windows"))
+    {
+        commandLine 'cmd', '/c', 'sass', SASS_OPT, MAIN_SASS_DIR, BUILT_CSS_DIR
+    }
+    else
+    {
+        executable 'sass'
+        args SASS_OPT, MAIN_SASS_DIR, BUILT_CSS_DIR
+    }
+}
+tasks.build.dependsOn 'compileSass'
+tasks.packApp.dependsOn 'compileSass'

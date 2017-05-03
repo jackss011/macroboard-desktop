@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="package" />
+          <option value="packApp" />
         </list>
       </option>
       <option name="vmOptions" value="" />
