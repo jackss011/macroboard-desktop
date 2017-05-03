@@ -7,18 +7,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import macroboard.controls.ControlsLibrary;
 import macroboard.network.NetAdapter;
 import macroboard.utility.ResourcesLocator;
 import macroboard.utility.StaticLibrary;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 
 public class Main extends Application
@@ -61,7 +55,7 @@ public class Main extends Application
     {
         super.stop();
 
-        netAdapter.close();
+        netAdapter.stop();
     }
 
     public static void main(String[] args)

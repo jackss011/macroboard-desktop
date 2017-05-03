@@ -1,18 +1,22 @@
 package macroboard.network;
 
 
+import macroboard.utility.Log;
+
 /**
  *
  */
-public class NetAdapter
+public class NetAdapter implements TcpService.OnTcpListener
 {
     private BeaconService beaconService = new BeaconService();
     private UdpReceiver udpReceiver = new UdpReceiver();
-    private TcpService tcpService = new TcpService();
+    private TcpService tcpService = new TcpService(this);
 
     private State networkState = State.IDLE;
 
     private OnNetworkEventListener networkEventListener;
+
+
 
     public enum State
     {
@@ -29,6 +33,8 @@ public class NetAdapter
         void onNetworkFailure();
     }
 
+
+
     public void accept()
     {
         setNetworkState(State.CONNECTING);
@@ -37,12 +43,9 @@ public class NetAdapter
         tcpService.start();
     }
 
-    public void close()
+    public void stop()
     {
-        beaconService.cancel();
-        tcpService.cancel();
-        udpReceiver.cancel();
-
+        reset();
         setNetworkState(State.IDLE);
     }
 
@@ -59,6 +62,13 @@ public class NetAdapter
             notifyNetworkState();
     }
 
+    private void reset()
+    {
+        beaconService.cancel();
+        tcpService.cancel();
+        udpReceiver.cancel();
+    }
+
     private void notifyNetworkState()
     {
         if(networkEventListener != null)
@@ -72,10 +82,27 @@ public class NetAdapter
 
     private void setNetworkState(State newState)
     {
+        Log.d("New state: " + newState.name());
+
         if(newState != networkState)
         {
             networkState = newState;
             notifyNetworkState();
         }
+    }
+
+    @Override
+    public void onTcpConnected()
+    {
+        beaconService.cancel();
+        udpReceiver.start();
+        setNetworkState(State.CONNECTED);
+    }
+
+    @Override
+    public void onTcpFailure()
+    {
+        reset();
+        setNetworkState(State.FAILURE);
     }
 }
