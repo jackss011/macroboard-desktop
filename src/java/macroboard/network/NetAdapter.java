@@ -16,8 +16,9 @@ public class NetAdapter implements TcpService.OnTcpListener
 
     private OnNetworkEventListener networkEventListener;
 
+    private DeviceInfo connectedDevice;
 
-
+    
     public enum State
     {
         IDLE,
@@ -34,6 +35,11 @@ public class NetAdapter implements TcpService.OnTcpListener
     }
 
 
+    public NetAdapter(OnNetworkEventListener networkEventListener)
+    {
+        this.networkEventListener = networkEventListener;
+    }
+
 
     public void accept()
     {
@@ -49,9 +55,9 @@ public class NetAdapter implements TcpService.OnTcpListener
         setNetworkState(State.IDLE);
     }
 
-    public Object getConnectedDevice()
+    public DeviceInfo getConnectedDevice()
     {
-        return null;
+        return connectedDevice;
     }
 
     public void setNetworkEventListener(OnNetworkEventListener networkEventListener)
@@ -64,6 +70,8 @@ public class NetAdapter implements TcpService.OnTcpListener
 
     private void reset()
     {
+        connectedDevice = null;
+
         beaconService.cancel();
         tcpService.cancel();
         udpReceiver.cancel();
@@ -92,10 +100,12 @@ public class NetAdapter implements TcpService.OnTcpListener
     }
 
     @Override
-    public void onTcpConnected()
+    public void onTcpConnected(DeviceInfo deviceInfo)
     {
         beaconService.cancel();
         udpReceiver.start();
+
+        connectedDevice = deviceInfo;
         setNetworkState(State.CONNECTED);
     }
 

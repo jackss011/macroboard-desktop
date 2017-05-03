@@ -11,13 +11,14 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import macroboard.controls.ControlsLibrary;
 import macroboard.network.NetAdapter;
+import macroboard.utility.Log;
 import macroboard.utility.ResourcesLocator;
 import macroboard.utility.StaticLibrary;
 
 
-public class Main extends Application
+public class Main extends Application implements NetAdapter.OnNetworkEventListener
 {
-    private NetAdapter netAdapter = new NetAdapter();
+    private NetAdapter netAdapter = new NetAdapter(this);
 
     @Override
     public void start(Stage primaryStage) throws Exception
@@ -67,5 +68,18 @@ public class Main extends Application
     private static void setupSystemProperties()
     {
         System.setProperty("jna.library.path", ResourcesLocator.getBinariesFolder() + ";build/libs/library/shared;");
+    }
+
+    @Override
+    public void onNetworkStateChanged(NetAdapter.State newState)
+    {
+        if(newState == NetAdapter.State.CONNECTED)
+            Log.d("Connected to: " + netAdapter.getConnectedDevice().name);
+    }
+
+    @Override
+    public void onNetworkFailure()
+    {
+
     }
 }

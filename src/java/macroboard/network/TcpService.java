@@ -36,7 +36,10 @@ class TcpService extends Service
                 if(device.isConnected())
                 {
                     Log.d("Device connected");
-                    onConnected();  //TODO: provide device info
+
+                    onConnected(new DeviceInfo(
+                            device.getInetAddress().getHostName(),
+                            device.getInetAddress().getHostAddress()));
                 }
                 else
                 {
@@ -105,6 +108,7 @@ class TcpService extends Service
             catch (IOException e)
             {
                 e.printStackTrace();
+                onFailure();
             }
         }
 
@@ -115,9 +119,9 @@ class TcpService extends Service
             shutdown();
         }
 
-        private void onConnected()
+        private void onConnected(DeviceInfo deviceInfo)
         {
-            Platform.runLater(() -> TcpService.this.onTcpConnected());
+            Platform.runLater(() -> TcpService.this.onTcpConnected(new DeviceInfo(deviceInfo)));
         }
 
         private void onFailure()
@@ -128,7 +132,7 @@ class TcpService extends Service
 
     interface OnTcpListener
     {
-        void onTcpConnected();
+        void onTcpConnected(DeviceInfo deviceInfo);
 
         void onTcpFailure();
     }
@@ -155,9 +159,9 @@ class TcpService extends Service
         this.tcpListener = tcpListener;
     }
 
-    private void onTcpConnected()
+    private void onTcpConnected(DeviceInfo deviceInfo)
     {
-        if(tcpListener != null) tcpListener.onTcpConnected();
+        if(tcpListener != null) tcpListener.onTcpConnected(deviceInfo);
     }
 
     private void onTcpFailure()
