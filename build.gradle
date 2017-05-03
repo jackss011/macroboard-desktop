@@ -80,7 +80,7 @@ def artifactsOutDir = "build/artifacts/$appName"
 
 
 // Copy the dll to build/native where it can be found by jna
-task('moveDll', type: Copy, dependsOn: 'mbctrlsSharedLibrary') {
+task moveDll(type: Copy, dependsOn: 'mbctrlsSharedLibrary') {
     group 'app'
     from nativeLibs
     into 'build/native'
@@ -90,18 +90,19 @@ tasks.findByName('build').dependsOn 'moveDll'
 
 
 // Create a jar and copy native library in the parent folder
-task('package', type: Copy, dependsOn: ['jar', 'mbctrlsSharedLibrary']) {
+task('package', type: Copy, dependsOn: ['packJar', 'mbctrlsSharedLibrary']) {
     group 'app'
     from nativeLibs
     into "$artifactsOutDir/bin"
 }
 
 
-// Java plugin: create a jar for the app
-jar {
+// Create application jar
+task packJar(type: Jar, dependsOn: 'classes') {
     manifest { attributes("Main-Class": "macroboard.Main") }
+    from sourceSets.main.output.classesDir    //main source set
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }  //include libraries
     destinationDir file(artifactsOutDir)
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
 
