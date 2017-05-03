@@ -18,7 +18,7 @@ public class NetAdapter implements TcpService.OnTcpListener
 
     private DeviceInfo connectedDevice;
 
-    
+
     public enum State
     {
         IDLE,
@@ -43,16 +43,25 @@ public class NetAdapter implements TcpService.OnTcpListener
 
     public void accept()
     {
-        setNetworkState(State.CONNECTING);
+        if(networkState == State.IDLE)
+        {
+            beaconService.start();
+            tcpService.start();
 
-        beaconService.start();
-        tcpService.start();
+            setNetworkState(State.CONNECTING);
+        }
     }
 
     public void stop()
     {
         reset();
         setNetworkState(State.IDLE);
+    }
+
+    public void restart()
+    {
+        reset();
+        accept();
     }
 
     public DeviceInfo getConnectedDevice()
@@ -66,6 +75,11 @@ public class NetAdapter implements TcpService.OnTcpListener
 
         if(this.networkEventListener != null)
             notifyNetworkState();
+    }
+
+    public State getNetworkState()
+    {
+        return networkState;
     }
 
     private void reset()
