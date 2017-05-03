@@ -6,3 +6,6 @@
 /.gradle
 .idea/**/libraries
 .idea/**/gradle.xml
+
+# Sass
+.sass-cache

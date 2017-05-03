@@ -23,7 +23,7 @@ sourceSets {
         }
         resources {
             srcDirs = ['src/res']
-            include '**/*.css'
+            exclude '**/*.sass'
         }
         output.resourcesDir 'build/classes/main/macroboard'
     }
@@ -103,3 +103,30 @@ jar {
     destinationDir file(artifactsOutDir)
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
+
+
+def final MAIN_SASS_DIR = 'src/res/main.sass'
+def final BUILT_CSS_DIR = 'build/classes/main/macroboard/main.css'
+def final SASS_OPT = '--sourcemap=none'
+
+// Compile sass
+task compileSass(type: Exec) {
+    group 'app'
+    mustRunAfter 'classes'
+
+    doFirst {
+        file(BUILT_CSS_DIR).getParentFile().mkdirs()
+    }
+
+    if(System.getProperty("os.name").toLowerCase().contains("windows"))
+    {
+        commandLine 'cmd', '/c', 'sass', SASS_OPT, MAIN_SASS_DIR, BUILT_CSS_DIR
+    }
+    else
+    {
+        executable 'sass'
+        args SASS_OPT, MAIN_SASS_DIR, BUILT_CSS_DIR
+    }
+}
+tasks.getByName('build').dependsOn 'compileSass'
+tasks.getByName('package').dependsOn 'compileSass'
