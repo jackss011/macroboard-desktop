@@ -59,7 +59,7 @@ task moveDll(type: Copy, dependsOn: 'librarySharedLibrary') {
     from nativeLibs
     into 'build/native'
 }
-tasks.findByName('build').dependsOn 'moveDll'
+tasks.build.dependsOn 'moveDll'
 
 
 
@@ -99,21 +99,21 @@ sourceSets {
 }
 
 
-/** Package the entire app in a folder */
-task('package', type: Copy, dependsOn: ['packJar', 'librarySharedLibrary']) {
-    group 'app'
-
-    from nativeLibs
-    into "$ARTIFACTS_OUT_DIR/bin"
-}
-
-
 /** Package java code in a Jar file */
 task packJar(type: Jar, dependsOn: 'classes') {
     manifest { attributes("Main-Class": "macroboard.Main") }
     from sourceSets.main.output.classesDir    //main source set
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }  //include libraries
     destinationDir file(ARTIFACTS_OUT_DIR)
+}
+
+
+/** Package the entire app in a folder */
+task packApp(type: Copy, dependsOn: ['packJar', 'librarySharedLibrary']) {
+    group 'app'
+
+    from nativeLibs
+    into "$ARTIFACTS_OUT_DIR/bin"
 }
 
 
@@ -145,5 +145,5 @@ task compileSass(type: Exec) {
         args SASS_OPT, MAIN_SASS_DIR, BUILT_CSS_DIR
     }
 }
-tasks.getByName('build').dependsOn 'compileSass'
-tasks.getByName('package').dependsOn 'compileSass'
+tasks.build.dependsOn 'compileSass'
+tasks.packApp.dependsOn 'compileSass'
