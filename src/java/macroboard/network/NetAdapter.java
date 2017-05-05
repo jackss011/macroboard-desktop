@@ -1,7 +1,7 @@
 package macroboard.network;
 
-
 import macroboard.utility.Log;
+
 
 /**
  *
@@ -37,7 +37,7 @@ public class NetAdapter implements TcpService.OnTcpListener
 
     public NetAdapter(OnNetworkEventListener networkEventListener)
     {
-        this.networkEventListener = networkEventListener;
+        setNetworkEventListener(networkEventListener);
     }
 
 
