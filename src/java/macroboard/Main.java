@@ -28,11 +28,11 @@ public class Main extends Application implements NetAdapter.OnNetworkEventListen
         scene.getStylesheets().add(ResourcesLocator.getMainCssPath());
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
-        primaryStage.show();
-
 
         netAdapter = new NetAdapter(this);
         netAdapter.accept();
+
+        primaryStage.show();
     }
 
     private Parent buildUI()
