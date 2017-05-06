@@ -1,7 +1,6 @@
 package macroboard;
 
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -15,7 +14,6 @@ import macroboard.network.NetAdapter;
 import macroboard.ui.DeviceRow;
 import macroboard.utility.Log;
 import macroboard.utility.ResourcesLocator;
-import macroboard.utility.StaticLibrary;
 
 
 public class Main extends Application implements NetAdapter.OnNetworkEventListener
@@ -43,11 +41,9 @@ public class Main extends Application implements NetAdapter.OnNetworkEventListen
         title.setCache(true);
         title.setId("title");
 
-        HBox header = new HBox(title);  //TODO: add to main.sass
+        HBox header = new HBox(title);
         header.setId("header");
         header.setCache(true);
-        header.setPadding(new Insets(12, 30, 12, 30));
-        header.setEffect(StaticLibrary.buildShadowBox(8));
 
         Button test = new Button("Mute");
         test.setOnAction(event -> ControlsLibrary.INSTANCE.typeMuteKey());

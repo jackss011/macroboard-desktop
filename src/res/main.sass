@@ -1,3 +1,13 @@
+// Main css file
+
+=soft-shadow()
+    -fx-effect: dropshadow(one-pass-box, #ccc, 5, 0.0, 0, 0)
+
+
+// |=====================
+// |==> MAIN
+// |=====================
+
 #title
     -fx-fill: white
     -fx-font: 25px Helvetica
@@ -5,6 +15,8 @@
 
 #header
     -fx-background-color: #37a184
+    -fx-padding: 12 30 12 30
+    +soft-shadow
 
 .divider
     -fx-fill: #a7a7a7
@@ -18,6 +30,7 @@ $v-padd: 10
 
 #device-row
     -fx-background-color: #f3f3f3
+    +soft-shadow
 
 #device-texts
     -fx-spacing: 5

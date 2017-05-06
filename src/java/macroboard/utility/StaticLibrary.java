@@ -20,27 +20,6 @@ public class StaticLibrary
 {
 
 // |==========================
-// |==>  EFFECTS
-// |==========================
-
-    private static final Color SHADOW_COLOR = Color.LIGHTGRAY;
-    private static final double SHADOW_OFFSET = 3.0;
-
-    /** Build an android-like shadow which can be added to a Node */
-    public static DropShadow buildShadowBox(float elevation)
-    {
-        DropShadow ds = new DropShadow();
-        ds.setColor(SHADOW_COLOR);
-        ds.setHeight(elevation);
-        ds.setOffsetX(SHADOW_OFFSET);
-        ds.setOffsetY(SHADOW_OFFSET);
-
-        return ds;
-    }
-
-
-
-// |==========================
 // |==>  DIVIDERS
 // |==========================
 
