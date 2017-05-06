@@ -31,4 +31,10 @@ public class ResourcesLocator
     {
         return Main.class.getResource("main.css").toExternalForm();
     }
+
+    /** Setup system properties using System.setProperty(k,v) */
+    public static void setupSystemProperties()
+    {
+        System.setProperty("jna.library.path", ResourcesLocator.getBinariesFolder() + ";build/libs/library/shared;");
+    }
 }

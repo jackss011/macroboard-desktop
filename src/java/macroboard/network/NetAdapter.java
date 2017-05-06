@@ -1,7 +1,5 @@
 package macroboard.network;
 
-import macroboard.utility.Log;
-
 
 /**
  *
@@ -32,6 +30,8 @@ public class NetAdapter implements TcpService.OnTcpListener
         void onNetworkStateChanged(State newState);
 
         void onNetworkFailure();
+
+        void onDeviceChange(DeviceInfo deviceInfo);
     }
 
 
@@ -73,8 +73,8 @@ public class NetAdapter implements TcpService.OnTcpListener
     {
         this.networkEventListener = networkEventListener;
 
-        if(this.networkEventListener != null)
-            notifyNetworkState();
+        notifyNetworkState();
+        notifyDeviceChange();
     }
 
     public State getNetworkState()
@@ -84,27 +84,16 @@ public class NetAdapter implements TcpService.OnTcpListener
 
     private void reset()
     {
-        connectedDevice = null;
+        setConnectedDevice(null);
 
         beaconService.cancel();
         tcpService.cancel();
         udpReceiver.cancel();
     }
 
-    private void notifyNetworkState()
-    {
-        if(networkEventListener != null)
-        {
-            if(networkState == State.FAILURE)
-                networkEventListener.onNetworkFailure();
-            else
-                networkEventListener.onNetworkStateChanged(networkState);
-        }
-    }
-
     private void setNetworkState(State newState)
     {
-        Log.d("New state: " + newState.name());
+        //Log.d("New state: " + newState.name());
 
         if(newState != networkState)
         {
@@ -113,13 +102,36 @@ public class NetAdapter implements TcpService.OnTcpListener
         }
     }
 
+    private void notifyNetworkState()
+    {
+        if(networkEventListener != null)
+        {
+            if(networkState == State.FAILURE)
+                networkEventListener.onNetworkFailure();
+
+            networkEventListener.onNetworkStateChanged(networkState);
+        }
+    }
+
+    private void setConnectedDevice(DeviceInfo info)
+    {
+        this.connectedDevice = info;
+        notifyDeviceChange();
+    }
+
+    private void notifyDeviceChange()
+    {
+        if(networkEventListener != null)
+            networkEventListener.onDeviceChange(getConnectedDevice());
+    }
+
     @Override
     public void onTcpConnected(DeviceInfo deviceInfo)
     {
         beaconService.cancel();
         udpReceiver.start();
 
-        connectedDevice = deviceInfo;
+        setConnectedDevice(deviceInfo);
         setNetworkState(State.CONNECTED);
     }
 

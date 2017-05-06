@@ -10,7 +10,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import macroboard.controls.ControlsLibrary;
+import macroboard.network.DeviceInfo;
 import macroboard.network.NetAdapter;
+import macroboard.ui.DeviceRow;
 import macroboard.utility.Log;
 import macroboard.utility.ResourcesLocator;
 import macroboard.utility.StaticLibrary;
@@ -18,7 +20,8 @@ import macroboard.utility.StaticLibrary;
 
 public class Main extends Application implements NetAdapter.OnNetworkEventListener
 {
-    private NetAdapter netAdapter = new NetAdapter(this);
+    private NetAdapter netAdapter;
+    private DeviceRow deviceRow;
 
     @Override
     public void start(Stage primaryStage) throws Exception
@@ -29,6 +32,8 @@ public class Main extends Application implements NetAdapter.OnNetworkEventListen
         primaryStage.setResizable(false);
         primaryStage.show();
 
+
+        netAdapter = new NetAdapter(this);
         netAdapter.accept();
     }
 
@@ -38,7 +43,7 @@ public class Main extends Application implements NetAdapter.OnNetworkEventListen
         title.setCache(true);
         title.setId("title");
 
-        HBox header = new HBox(title);
+        HBox header = new HBox(title);  //TODO: add to main.sass
         header.setId("header");
         header.setCache(true);
         header.setPadding(new Insets(12, 30, 12, 30));
@@ -47,8 +52,9 @@ public class Main extends Application implements NetAdapter.OnNetworkEventListen
         Button test = new Button("Mute");
         test.setOnAction(event -> ControlsLibrary.INSTANCE.typeMuteKey());
 
-        VBox root = new VBox(header, test);
-        return root;
+        deviceRow = new DeviceRow();
+
+        return new VBox(header, deviceRow);
     }
 
     @Override
@@ -59,27 +65,46 @@ public class Main extends Application implements NetAdapter.OnNetworkEventListen
         netAdapter.stop();
     }
 
-    public static void main(String[] args)
-    {
-        setupSystemProperties();
-        launch(args);
-    }
-
-    private static void setupSystemProperties()
-    {
-        System.setProperty("jna.library.path", ResourcesLocator.getBinariesFolder() + ";build/libs/library/shared;");
-    }
-
     @Override
     public void onNetworkStateChanged(NetAdapter.State newState)
     {
-        if(newState == NetAdapter.State.CONNECTED)
-            Log.d("Connected to: " + netAdapter.getConnectedDevice().name);
+        Log.d("New state: " + newState.name());
+
+        switch (newState)
+        {
+            case IDLE:
+                deviceRow.setState(DeviceRow.State.NOT_CONNECTED);
+                break;
+
+            case CONNECTING:
+                deviceRow.setState(DeviceRow.State.CONNECTING);
+                break;
+
+            case CONNECTED:
+                deviceRow.setState(DeviceRow.State.CONNECTED);
+                break;
+
+            case FAILURE:
+                deviceRow.setState(DeviceRow.State.NOT_CONNECTED);
+                break;
+        }
     }
 
     @Override
     public void onNetworkFailure()
     {
+        Log.e("Net failure");
+    }
 
+    @Override
+    public void onDeviceChange(DeviceInfo deviceInfo)
+    {
+        deviceRow.setDeviceInfo(deviceInfo);
+    }
+
+    public static void main(String[] args)
+    {
+        ResourcesLocator.setupSystemProperties();
+        launch(args);
     }
 }
