@@ -18,9 +18,15 @@ import javafx.scene.shape.Rectangle;
 @SuppressWarnings("WeakerAccess")
 public class StaticLibrary
 {
+
+// |==========================
+// |==>  EFFECTS
+// |==========================
+
     private static final Color SHADOW_COLOR = Color.LIGHTGRAY;
     private static final double SHADOW_OFFSET = 3.0;
 
+    /** Build an android-like shadow which can be added to a Node */
     public static DropShadow buildShadowBox(float elevation)
     {
         DropShadow ds = new DropShadow();
@@ -33,8 +39,19 @@ public class StaticLibrary
     }
 
 
+
+// |==========================
+// |==>  DIVIDERS
+// |==========================
+
     private static final float DIVIDER_SIZE = 1.f;
 
+    /**
+     *  Add a thin Rectangle to the parent.
+     *  @param parent the divider is added to this node
+     *  @param vertical whenever the divider is vertical or not, if the parent is a HBox/VBox the orientation
+     *                  can be auto-determined: use addDivider(parent)
+     */
     public static void addDivider(Pane parent, boolean vertical)
     {
         if(parent == null ) throw new AssertionError("Divider null parent");
@@ -58,7 +75,11 @@ public class StaticLibrary
         parent.getChildren().add(r);
     }
 
-
+    /**
+     *  Add a thin Rectangle to a HBox or VBox parent. The orientation is adjusted based of the
+     *  orientation of the parent.
+     *  @param parent must be a subclass of HBox or VBox
+     */
     public static void addDivider(Pane parent)
     {
         if(parent instanceof HBox)
