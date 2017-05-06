@@ -1,8 +1,9 @@
-package macroboard.network;
+package macroboard.network.wifi;
 
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import macroboard.network.DeviceInfo;
 import macroboard.settings.StaticSettings;
 import macroboard.utility.Log;
 
@@ -18,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 /**
  *  Manages a TCP connection
  */
-class TcpService extends Service
+public class TcpService extends Service
 {
     private class TcpConnection extends Task
     {
@@ -131,7 +132,7 @@ class TcpService extends Service
         }
     }
 
-    interface OnTcpListener
+    public interface OnTcpListener
     {
         void onTcpConnected(DeviceInfo deviceInfo);
 
@@ -143,7 +144,7 @@ class TcpService extends Service
     private OnTcpListener tcpListener;
 
 
-    TcpService(OnTcpListener tcpListener)
+    public TcpService(OnTcpListener tcpListener)
     {
         this.tcpListener = tcpListener;
     }

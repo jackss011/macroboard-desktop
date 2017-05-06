@@ -1,4 +1,4 @@
-package macroboard.network;
+package macroboard.network.wifi;
 
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -18,7 +18,7 @@ import java.util.concurrent.Future;
 /**
  *  Service responsible to broadcast UDP packets in order to be found by other devices.
  */
-class BeaconService extends Service
+public class BeaconService extends Service
 {
     private class BeaconTask extends Task
     {

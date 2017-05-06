@@ -1,4 +1,4 @@
-package macroboard.network;
+package macroboard.network.wifi;
 
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Service listening for UDP packets.
  */
-class UdpReceiver extends Service   //TODO: check for errors
+public class UdpReceiver extends Service   //TODO: check for errors
 {
     @Override
     protected Task createTask()

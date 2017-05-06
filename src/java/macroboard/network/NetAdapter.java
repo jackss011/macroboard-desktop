@@ -1,5 +1,9 @@
 package macroboard.network;
 
+import macroboard.network.wifi.BeaconService;
+import macroboard.network.wifi.TcpService;
+import macroboard.network.wifi.UdpReceiver;
+
 
 /**
  *
