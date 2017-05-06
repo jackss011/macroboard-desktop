@@ -126,6 +126,7 @@ class TcpService extends Service
 
         private void onFailure()
         {
+            shutdown();
             Platform.runLater(TcpService.this::onTcpFailure);
         }
     }

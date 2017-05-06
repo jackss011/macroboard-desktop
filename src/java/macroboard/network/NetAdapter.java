@@ -45,8 +45,8 @@ public class NetAdapter implements TcpService.OnTcpListener
     {
         if(networkState == State.IDLE)
         {
-            beaconService.start();
-            tcpService.start();
+            beaconService.restart();
+            tcpService.restart();
 
             setNetworkState(State.CONNECTING);
         }
@@ -60,7 +60,7 @@ public class NetAdapter implements TcpService.OnTcpListener
 
     public void restart()
     {
-        reset();
+        stop();
         accept();
     }
 
@@ -84,17 +84,15 @@ public class NetAdapter implements TcpService.OnTcpListener
 
     private void reset()
     {
-        setConnectedDevice(null);
-
         beaconService.cancel();
         tcpService.cancel();
         udpReceiver.cancel();
+
+        setConnectedDevice(null);
     }
 
     private void setNetworkState(State newState)
     {
-        //Log.d("New state: " + newState.name());
-
         if(newState != networkState)
         {
             networkState = newState;
@@ -129,7 +127,7 @@ public class NetAdapter implements TcpService.OnTcpListener
     public void onTcpConnected(DeviceInfo deviceInfo)
     {
         beaconService.cancel();
-        udpReceiver.start();
+        udpReceiver.restart();
 
         setConnectedDevice(deviceInfo);
         setNetworkState(State.CONNECTED);
@@ -138,7 +136,7 @@ public class NetAdapter implements TcpService.OnTcpListener
     @Override
     public void onTcpFailure()
     {
-        reset();
-        setNetworkState(State.FAILURE);
+        restart();
+        //setNetworkState(State.FAILURE);
     }
 }
