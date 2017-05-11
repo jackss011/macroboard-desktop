@@ -4,6 +4,7 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import macroboard.network.DeviceInfo;
+import macroboard.utility.Log;
 import macroboard.utility.StaticLibrary;
 
 
@@ -26,7 +27,7 @@ public class DeviceRow extends StackPane
 
     private Pane root;
     private Pane textsBox;
-    private Text deviceName;
+    private AnimatedText deviceName;
     private Text deviceAddress;
     private Rectangle statusBar;
 
@@ -45,10 +46,10 @@ public class DeviceRow extends StackPane
     {
         super();
 
-        deviceName = new Text("Device name");
+        deviceName = new AnimatedText();
         deviceName.setId(ID_NAME);
 
-        deviceAddress = new Text("Address");
+        deviceAddress = new Text();
         deviceAddress.setId(ID_ADDRESS);
 
         textsBox = new VBox(deviceName, deviceAddress);
@@ -72,6 +73,7 @@ public class DeviceRow extends StackPane
     private void updateUI()
     {
         statusBar.getStyleClass().clear();
+        deviceName.stopBlink();
 
         if(deviceInfo != null)
         {
@@ -90,6 +92,7 @@ public class DeviceRow extends StackPane
 
                 case CONNECTING:
                     deviceName.setText("Looking for devices...");
+                    deviceName.startBlink();
                     break;
 
                 case CONNECTED:
