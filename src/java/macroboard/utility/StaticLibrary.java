@@ -12,6 +12,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+
 /**
  *
  */
@@ -67,5 +74,19 @@ public class StaticLibrary
             addDivider(parent, false);
         else
             throw new AssertionError("Divider parent must be HBox or VBox");
+    }
+
+    /** Create a BufferedReader for a TCP Socket */
+    public static BufferedReader makeReader(Socket socket) throws IOException
+    {
+        return new BufferedReader(new BufferedReader(new InputStreamReader(
+                socket.getInputStream(),
+                StandardCharsets.UTF_8)));
+    }
+
+    /** Create a PrintWriter for a TCP Socket */
+    public static PrintWriter makeWriter(Socket socket) throws IOException
+    {
+        return new PrintWriter(socket.getOutputStream(), true);
     }
 }
