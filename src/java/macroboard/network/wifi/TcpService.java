@@ -4,12 +4,15 @@ import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import macroboard.network.DeviceInfo;
+import macroboard.network.Packager;
 import macroboard.settings.StaticSettings;
 import macroboard.utility.Log;
+import macroboard.utility.StaticLibrary;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -25,62 +28,54 @@ public class TcpService extends Service
     {
         private Socket device;
 
+        private boolean handshakeComplete;
+
         @Override
         protected Object call() throws Exception
         {
+            Log.d("Start TCP server");
+
+            //connect to a device
             try(ServerSocket serverSocket = new ServerSocket(StaticSettings.NET_PORT))
             {
-                Log.d("Start TCP service");
-
                 device = serverSocket.accept();
-
-                if(device.isConnected())
+                if(!device.isConnected())
                 {
-                    Log.d("Device connected");
-
-                    onConnected(new DeviceInfo(
-                            device.getInetAddress().getHostName(),
-                            device.getInetAddress().getHostAddress()));
-                }
-                else
-                {
-                    Log.e("Device connection error");
                     onFailure();
+                    return null;
                 }
 
             }
             catch(SocketException e)
             {
                 e.printStackTrace();
-                onFailure();
+                onFailure(); return null;
             }
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    device.getInputStream(),
-                    StandardCharsets.UTF_8));
+            //data loop
+            dataLoop();
 
+            Log.d("Stop TCP server");
+            handshakeComplete = false;
+            return null;
+        }
+
+        private void dataLoop() throws IOException
+        {
+            BufferedReader reader = StaticLibrary.makeReader(device);
             while(true)
             {
                 try
                 {
-                    if(isCancelled())
-                    {
-                        shutdown();
-                        break;
-                    }
+                    if(isCancelled()) { shutdown(); break; }
 
                     String data = reader.readLine();
-
-                    if(data != null)
+                    if(data == null)
                     {
-                        Log.d("Data: " + data);
+                        onFailure(); break;
                     }
                     else
-                    {
-                        Log.e("Null data");
-                        onFailure();
-                        break;
-                    }
+                        handleLine(data);
                 }
                 catch (Exception e)
                 {
@@ -94,12 +89,32 @@ public class TcpService extends Service
                     break;
                 }
             }
-
-            Log.d("Stop TCP server");
-            return null;
         }
 
-        // Close the socket
+        private void handleLine(String data) throws IOException
+        {
+            if(handshakeComplete)
+            {
+                Log.d(data);
+            }
+            else
+            {
+                Packager.HandShake hs = Packager.unpackHandShake(data);
+                if(hs != null)
+                {
+                    //respond to handshake
+                    PrintWriter writer = StaticLibrary.makeWriter(device);
+                    writer.println(Packager.packHandShake());
+                    handshakeComplete = true;
+
+                    onConnected(new DeviceInfo(hs.deviceName, device.getInetAddress().getHostAddress()));
+                }
+                else
+                    Log.e("Error during handshake");
+            }
+        }
+
+        /** Close the socket */
         private void shutdown()
         {
             try
@@ -111,6 +126,8 @@ public class TcpService extends Service
                 e.printStackTrace();
                 onFailure();
             }
+
+            handshakeComplete = false;
         }
 
         @Override
@@ -131,6 +148,7 @@ public class TcpService extends Service
             Platform.runLater(TcpService.this::onTcpFailure);
         }
     }
+
 
     public interface OnTcpListener
     {
