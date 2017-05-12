@@ -2,6 +2,7 @@ package macroboard.network.wifi;
 
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import macroboard.network.Packager;
 import macroboard.settings.StaticSettings;
 import macroboard.utility.Log;
 
@@ -44,12 +45,10 @@ public class BeaconService extends Service
 
                     String requestData = new String(packet.getData(), packet.getOffset(), packet.getLength(), StandardCharsets.UTF_8);
 
-                    if (true) //TODO: check data packet data here
+                    if(validateRequestData(requestData))
                     {
-                        InetAddress senderAddress = packet.getAddress();
-                        Log.d("Received from: " + senderAddress.getHostAddress());
-
-                        final String responseData = "response";
+                        final InetAddress senderAddress = packet.getAddress();
+                        final String responseData = getResponseData();
 
                         DatagramPacket responsePacket = new DatagramPacket(
                                 responseData.getBytes(StandardCharsets.UTF_8),
@@ -58,6 +57,10 @@ public class BeaconService extends Service
                                 StaticSettings.NET_PORT);
 
                         responder.send(responsePacket);
+                    }
+                    else
+                    {
+                        Log.e("Non valid response");
                     }
                 }
             }
@@ -85,5 +88,15 @@ public class BeaconService extends Service
     protected Task createTask()
     {
         return new BeaconTask();
+    }
+
+    private String getResponseData()
+    {
+        return Packager.packResponseData();
+    }
+
+    private boolean validateRequestData(String requestData)
+    {
+        return Packager.validateBeaconRequest(requestData);
     }
 }
