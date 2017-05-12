@@ -35,29 +35,32 @@ public class TcpService extends Service
         {
             Log.d("Start TCP server");
 
-            //connect to a device
+            try
+            {
+                if(connect())
+                    dataLoop();
+                else
+                    onFailure();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                onFailure();
+            }
+
+            handshakeComplete = false;
+
+            Log.d("Stop TCP server");
+            return null;
+        }
+
+        private boolean connect() throws IOException
+        {
             try(ServerSocket serverSocket = new ServerSocket(StaticSettings.NET_PORT))
             {
                 device = serverSocket.accept();
-                if(!device.isConnected())
-                {
-                    onFailure();
-                    return null;
-                }
-
+                return device.isConnected();
             }
-            catch(SocketException e)
-            {
-                e.printStackTrace();
-                onFailure(); return null;
-            }
-
-            //data loop
-            dataLoop();
-
-            Log.d("Stop TCP server");
-            handshakeComplete = false;
-            return null;
         }
 
         private void dataLoop() throws IOException
@@ -65,29 +68,15 @@ public class TcpService extends Service
             BufferedReader reader = StaticLibrary.makeReader(device);
             while(true)
             {
-                try
-                {
-                    if(isCancelled()) { shutdown(); break; }
+                if(isCancelled()) { shutdown(); break; }
 
-                    String data = reader.readLine();
-                    if(data == null)
-                    {
-                        onFailure(); break;
-                    }
-                    else
-                        handleLine(data);
-                }
-                catch (Exception e)
+                String data = reader.readLine();
+                if(data == null)
                 {
-                    if(device != null && !device.isConnected())
-                    {
-                        e.printStackTrace();
-                        onFailure();
-                    }
-
-                    shutdown();
-                    break;
+                    onFailure(); break;
                 }
+                else
+                    handleLine(data);
             }
         }
 
