@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class TcpService extends Service
 {
+    /** TCP connection Task */
     private class TcpConnection extends Task
     {
         private Socket device;
@@ -45,7 +46,7 @@ public class TcpService extends Service
             catch (IOException e)
             {
                 e.printStackTrace();
-                onFailure();
+                onFailure();    // call in main loop
             }
 
             handshakeComplete = false;
@@ -54,6 +55,7 @@ public class TcpService extends Service
             return null;
         }
 
+        /** Attempt to connect a valid socket */
         private boolean connect() throws IOException
         {
             try(ServerSocket serverSocket = new ServerSocket(StaticSettings.NET_PORT))
@@ -63,6 +65,7 @@ public class TcpService extends Service
             }
         }
 
+        /** Loop until an error occur or the task is cancelled */
         private void dataLoop() throws IOException
         {
             BufferedReader reader = StaticLibrary.makeReader(device);
@@ -71,15 +74,14 @@ public class TcpService extends Service
                 if(isCancelled()) { shutdown(); break; }
 
                 String data = reader.readLine();
-                if(data == null)
-                {
-                    onFailure(); break;
-                }
-                else
+                if(data != null)
                     handleLine(data);
+                else
+                    { onFailure(); break; } //input stream closed
             }
         }
 
+        /** Manage a line of data read from the network */
         private void handleLine(String data) throws IOException
         {
             if(handshakeComplete)
@@ -119,30 +121,36 @@ public class TcpService extends Service
             handshakeComplete = false;
         }
 
+        /** Called when a Socket is connected */
+        private void onConnected(DeviceInfo deviceInfo)
+        {
+            Platform.runLater(() -> TcpService.this.onTcpConnected(new DeviceInfo(deviceInfo)));
+        }
+
+        /** Called when a net error occur */
+        private void onFailure()
+        {
+            shutdown();
+            Platform.runLater(TcpService.this::onTcpFailure);
+        }
+
         @Override
         protected void cancelled()
         {
             super.cancelled();
             shutdown();
         }
-
-        private void onConnected(DeviceInfo deviceInfo)
-        {
-            Platform.runLater(() -> TcpService.this.onTcpConnected(new DeviceInfo(deviceInfo)));
-        }
-
-        private void onFailure()
-        {
-            shutdown();
-            Platform.runLater(TcpService.this::onTcpFailure);
-        }
     }
+//end
 
 
+    /** Listener for TCP events */
     public interface OnTcpListener
     {
+        /** Called when a socket is connected on FX thread */
         void onTcpConnected(DeviceInfo deviceInfo);
 
+        /** Called when a failure occur on FX thread */
         void onTcpFailure();
     }
 
